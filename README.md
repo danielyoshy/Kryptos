@@ -10,7 +10,7 @@ pip install -r requirements.txt
 python cenc_gui.py          # or double-click "CENC Vault.bat"
 ```
 
-A dark-gray Tkinter desktop app (no extra dependencies) with seven tabs:
+A dark-gray desktop app (no extra dependencies) with seven tabs:
 
 * **Vault Files:** store files directly in the app's local `vault_storage/` folder, filter
   between **All Files**, **Encrypted (.enc)**, and **Unencrypted**, search by filename, and
@@ -34,15 +34,22 @@ A dark-gray Tkinter desktop app (no extra dependencies) with seven tabs:
   this password** to unwrap multiple layers in one click.
 * **Inspect / Verify:** view a file's header without a password, or verify the password
   and integrity without writing anything.
-* **Hash Check:** compute a file's hash (SHA-256, SHA-512, SHA3-256, BLAKE2b) and optionally
-  compare it with an expected checksum. Result is a clear MATCH / MISMATCH.
-* **Baseline:** record the hashes of a file or folder, then later check for modified, missing
-  and new files. See [File integrity](#file-integrity).
+* **Chat:** End-to-End Encrypted communications chat that takes messages, encrypts it via a long passphrase,
+  then sends it through gmail. It is then recieved by the other user and the process is repeated in reverse.
 
 A progress bar and **Cancel** button are shared across tabs, and an activity log records what
 happened. Work runs on a background thread, so the window never freezes. Cancelling
 leaves your original untouched and removes any partial output. Passwords are cleared from
 the form after each operation.
+
+Screenshots of the UI: <img width="921" height="781" alt="image" src="https://github.com/user-attachments/assets/80f1dd7b-6bc0-45cd-bbbe-7cb198fc6bd9" />
+<img width="945" height="790" alt="image" src="https://github.com/user-attachments/assets/ed381f96-a47e-4d84-8895-0a015c1b1389" />
+<img width="948" height="785" alt="image" src="https://github.com/user-attachments/assets/80f88e93-1d7a-4b76-98ff-9400d46ecde5" />
+<img width="946" height="781" alt="image" src="https://github.com/user-attachments/assets/592cfbc3-4f02-4817-83a4-71bd69ecd04e" />
+<img width="943" height="779" alt="image" src="https://github.com/user-attachments/assets/8274e0db-ce37-4521-8e52-122a66918295" />
+<img width="947" height="777" alt="image" src="https://github.com/user-attachments/assets/5ee36b15-306b-4ecd-b17e-f3531d6d09c2" />
+<img width="943" height="780" alt="image" src="https://github.com/user-attachments/assets/e988ee00-88c4-4031-8878-1f9524f6100c" />
+<img width="1270" height="782" alt="image" src="https://github.com/user-attachments/assets/c1804276-eaa8-44a5-b5d6-a148d2e6b8a7" />
 
 ## File integrity
 
@@ -129,32 +136,3 @@ exit code is 5.
   * v2: PBKDF2-HMAC-SHA256, 600,000 iterations
   * v2 is only used when Argon2id isn't available.
 * Passphrases are NFC-normalised UTF-8, so the same passphrase gives the same key on every OS.
-
-## Behaviour notes
-
-* **Streaming:** files are processed in 1 MiB chunks, so memory use stays constant.
-  AES-GCM limits a single message to about 64 GiB.
-* **No partial output:** results go to a temporary `.part` file and are only renamed into
-  place once encryption or decryption has fully succeeded. If decryption fails, no
-  unauthenticated plaintext is left on disk.
-* **Wrong password vs. tampering:** AES-GCM can't tell these apart, because both just
-  produce a tag mismatch. The tool reports one authentication error that covers both.
-* **Exit codes:**
-
-  | Code | Meaning                        |
-  |-----:|--------------------------------|
-  | 0    | success                        |
-  | 1    | general / I/O error            |
-  | 2    | usage error                    |
-  | 3    | invalid or unsupported format  |
-  | 4    | authentication failed          |
-  | 5    | encrypted, but original could not be deleted |
-  | 6    | `integrity.py`: hash mismatch, or changes found |
-  | 7    | `integrity.py`: baseline password wrong or baseline altered |
-  | 130  | interrupted                    |
-
-## Tests
-
-```
-python -m unittest -v test_cenc
-```
